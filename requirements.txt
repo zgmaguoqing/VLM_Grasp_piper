@@ -1,0 +1,38 @@
+# Core Dependencies
+numpy==1.26.4
+scikit-learn
+scipy
+tqdm
+pyyaml
+ply
+
+# PyTorch (Compatible with CUDA 12.8 Docker env)
+# Letting pip resolve to latest stable (e.g. 2.x + cu12x)
+torch==2.7.0
+torchvision
+torchaudio
+
+# Robotics & Simulation
+# Relaxed version constraints due to metadata issues with roboticstoolbox-python==1.1.1
+spatialmath-python>=1.1.14
+roboticstoolbox-python>=1.1.0
+modern-robotics==1.1.1
+mujoco==3.3.1
+transforms3d
+ikpy
+
+# Vision & GraspNet
+opencv-python==4.5.5.64
+ultralytics>=8.3.98
+open3d
+graspnetAPI
+
+# Audio & VLM
+openai-whisper
+soundfile
+sounddevice
+pydub
+openai
+
+# Note: pointnet2 and knn-pytorch are custom CUDA extensions
+# and must be compiled manually or in Dockerfile (python setup.py install)

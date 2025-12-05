@@ -1,1 +1,8 @@
 sam_b.pt
+__pycache__/
+*.pyc
+*.log
+debug_cloud/
+debug_img/
+frames_*.pdf
+frames_*.gv

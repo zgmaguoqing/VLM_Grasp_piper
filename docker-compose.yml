@@ -1,0 +1,39 @@
+services:
+  piper_vlm:
+    image: piper_vlm_local:latest
+    container_name: piper_vlm_dev
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      # 使用宿主机实际 IP，绕过 Rootless Docker 的 localhost 隔离
+      - DISPLAY=10.5.20.132:809 # ${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - __GLX_VENDOR_LIBRARY_NAME=nvidia
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - .:/root/VLM_Grasp_Interactive
+    entrypoint: []
+    command: /bin/bash
+    # >
+    #   bash -c "source /opt/ros/humble/setup.bash &&
+    #   source /root/ros2_ws/install/setup.bash &&
+    #   ros2 launch piper_gazebo piper_gazebo.launch.py"
+    # 如果需要访问 USB 设备（如相机），可以取消下面的注释
+    # devices:
+    #   - /dev/video0:/dev/video0
+    #   - /dev/video1:/dev/video1
+    #   - /dev/video2:/dev/video2
+    # volumes:
+    #   - /dev/bus/usb:/dev/bus/usb
+
