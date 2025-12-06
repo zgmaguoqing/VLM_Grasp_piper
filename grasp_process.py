@@ -1278,22 +1278,19 @@ def execute_grasp(env, gg):
     # 这里我们假设旧环境里的 world ≈ 当前的 base_link，
     # 所以直接把 T_wc 看成 T_bc（base -> camera）
 
-# 1. 物理位置 (必须和 Gazebo 里 spawn 的坐标一致)
-    t_bc = np.array([0.5, 0.0, 0.3])
+    # 1. 物理位置 (必须和 Gazebo 里 spawn 的坐标一致)
+    # 对应 camera_spawner_depth.py 里的 <pose>0.5 0.0 0.3 0 0.6 3.14159</pose>
+    x, y, z = 0.5, 0.0, 0.3
+    roll, pitch, yaw = 0.0, 0.6, 3.14159
 
-    # 2. 视线方向 n_bc (Camera X-axis)
-    #    目标点: (0.2, 0, 0) [方块位置]
-    #    相机点: (0.5, 0, 0.3)
-    #    向量 = 目标 - 相机 = (-0.3, 0, -0.3)
-    #    这表示：向后(-0.3) 且 向下(-0.3)，也就是45度角俯视
-    n_bc = np.array([-0.3, 0.0, -0.3]) 
+    # 2. 生成变换矩阵 T_bc (Base -> Camera)
+    # 使用 RPY (Roll-Pitch-Yaw) 构建旋转矩阵
+    # Gazebo 的旋转顺序通常对应 spatialmath 的 'xyz' (Extrinsic) 或 'zyx' (Intrinsic)
+    # 这里直接用 spatialmath 的 RPY
+    T_bc = sm.SE3(x, y, z) * sm.SE3.RPY(roll, pitch, yaw, order='xyz')
 
-    # 3. 侧向 o_bc (Camera Y-axis)
-    #    保持水平，确保画面不歪
-    o_bc = np.array([0.0, -1.0, 0.0])
-
-    # 4. 生成变换矩阵
-    T_bc = sm.SE3.Trans(t_bc) * sm.SE3(sm.SO3.TwoVectors(x=n_bc, y=o_bc))
+    # 打印一下调试
+    print(f"[Execute] T_bc (Base->Camera):\n{T_bc}")
 
     # 下面代码保持不变...
     R_co = gg.rotation_matrices[0]           # 3x3

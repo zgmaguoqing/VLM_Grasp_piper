@@ -186,10 +186,10 @@ class PiperRosEnv:
         try:
             img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
             self.latest_color_img = img
-            # 调试：每收到一帧彩色图就打一条
-            self.node.get_logger().info(
-                f"Got COLOR frame: shape={img.shape}, encoding={msg.encoding}"
-            )
+            # # 调试：每收到一帧彩色图就打一条
+            # self.node.get_logger().info(
+            #     f"Got COLOR frame: shape={img.shape}, encoding={msg.encoding}"
+            # )
         except Exception as e:
             self.node.get_logger().error(f"Color Error: {e}")
 
@@ -235,10 +235,11 @@ class PiperRosEnv:
                 dmax = 0.0
                 nz = 0
 
-            self.node.get_logger().info(
-                f"Got DEPTH frame (cleaned): shape={depth.shape}, "
-                f"valid_pixels={nz}, min={dmin:.3f}, max={dmax:.3f}"
-            )
+            # # 调试
+            # self.node.get_logger().info(
+            #     f"Got DEPTH frame (cleaned): shape={depth.shape}, "
+            #     f"valid_pixels={nz}, min={dmin:.3f}, max={dmax:.3f}"
+            # )
 
         except Exception as e:
             self.node.get_logger().error(f"Depth Error: {e}")
@@ -285,16 +286,29 @@ class PiperRosEnv:
         goal_msg = FollowJointTrajectory.Goal()
         goal_msg.trajectory = traj
 
+        # === 关键修改：因为后台线程已经在 spin，这里不能再 spin_until_future_complete ===
         future = self.traj_client.send_goal_async(goal_msg)
-        # 等一下让它真正发出去
-        rclpy.spin_until_future_complete(self.node, future, timeout_sec=2.0)
+        
+        # 手动等待 future 完成
+        # 这里的 timeout 只是为了防止死锁，不是动作执行时间
+        start_time = time.time()
+        while not future.done():
+            time.sleep(0.01)
+            if time.time() - start_time > 2.0:
+                self.node.get_logger().error('Send goal timed out!')
+                return
+
         goal_handle = future.result()
         if goal_handle is None or not goal_handle.accepted:
             self.node.get_logger().error('Arm goal rejected by server')
             return
+            
         self.node.get_logger().info(
             f"[PiperRosEnv] Joint goal accepted: {positions}"
         )
+        # 注意：这里我们不等待动作真正执行完 (get_result)，而是直接返回，让外面 sleep 等待
+        # 这样更符合原来 move_joints 的设计意图
+
 
     def move_joints(self, joint_positions, duration=3.0):
         """给 execute_grasp 用的统一接口"""

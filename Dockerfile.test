@@ -217,7 +217,7 @@ COPY piper_ros.urdf /root/piper_ws/piper_ros.urdf
 
     
 WORKDIR /root/VLM_Grasp_Interactive
-COPY . /root/VLM_Grasp_Interactive
+COPY ./graspnet-baseline /root/VLM_Grasp_Interactive/graspnet-baseline
 
 # # 安装项目特定的 Python 依赖（需要 requirements.txt）
 # RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt 
