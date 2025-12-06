@@ -202,6 +202,19 @@ RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple \
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple \
     "matplotlib>=3.5.0" 
 
+# 在之前的 apt install 块中，或者单独添加一行
+RUN apt-get install -y --no-install-recommends --fix-missing \
+    libportaudio2 \
+    libasound-dev
+    
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    "transforms3d>=0.4.1"
+
+# 8. 复制 URDF 文件到指定位置 (如果存在)
+# 注意：这里假设你本地目录已经有了 piper_ros.urdf
+COPY piper_ros.urdf /root/piper_ws/piper_ros.urdf
+
+
     
 WORKDIR /root/VLM_Grasp_Interactive
 COPY . /root/VLM_Grasp_Interactive
@@ -220,12 +233,6 @@ RUN python3 setup.py install
 WORKDIR /root/VLM_Grasp_Interactive
 
 
-# 在之前的 apt install 块中，或者单独添加一行
-RUN apt-get install -y --no-install-recommends --fix-missing \
-    libportaudio2 \
-    libasound-dev
-    
-RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple \
-    "transforms3d>=0.4.1"
+
 
 ENTRYPOINT ["/bin/bash"]

@@ -3,6 +3,8 @@ services:
     image: piper_vlm_local:latest
     container_name: piper_vlm_dev
     network_mode: host
+    ipc: host        # 【新增】共享 IPC 命名空间，允许共享内存通信
+    pid: host        # 【新增】共享 PID 命名空间，便于调试和进程间通信
     privileged: true
     stdin_open: true
     tty: true
@@ -14,6 +16,9 @@ services:
               count: all
               capabilities: [gpu]
     environment:
+      # 强制使用 UDP 通信，解决 Rootless 网络发现问题
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/root/VLM_Grasp_Interactive/fastdds_udp.xml
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
       # 使用宿主机实际 IP，绕过 Rootless Docker 的 localhost 隔离
       - DISPLAY=10.5.20.132:809 # ${DISPLAY}
       - QT_X11_NO_MITSHM=1
